@@ -3,28 +3,25 @@ library(igraph)
 library(ggraph)
 
 path <-
-  paste0(
-    'https://raw.githubusercontent.com/rfordatascience/tidytuesday/',
-    'master/data/2019/2019-11-12/'
+  paste0('~/Dropbox/AERI/research/Prof.Woo/NLP_prediabetes02/data_analysis/20220502_pt단위분석/'
   )
 
-data <- read_csv(paste0(path, 'loc_cran_packages.csv'))
+data <- read_csv(paste0(path, 'preDM_risk_words_visual_df.csv'))
 
-# most popular programming languages from TIOBE Index (Nov. 2019) found in data
-# (only languages with position <= 16 are considered)
-popular_languages <- c(
-  'Java', 'C', 'Python', 'C++', 'C#', 'Visual Basic', 'JavaScript', 'PHP', 'SQL', 'Ruby', 'Objective C++', 'Assembly', 'R'
-)
+# ####
+preDM_category <- c(
+  '일반적 증상', '고혈당 증상', '저혈당 증상', '당뇨병케톤산증 증상', '피부 문제', '당뇨병성 발','위장 장애','감염','순환 장애','심리적인 문제','기타'
+  )
 
-# number of packages to display
-number_of_pkgs <- 300
+# number of preDMsigns and symptoms words to display
+number_of_words <- 170
 
-# find largest packages written in popular languages
-top_packages <- data %>%
-  filter(language %in% popular_languages) %>%
-  group_by(pkg_name) %>%
-  summarize(total_code = sum(code)) %>%
-  arrange(desc(total_code)) %>%
+# find largest words
+top_words <- data %>%
+  filter(category %in% popular_category) %>%
+  group_by(words) %>%
+  summarize(total_code = sum(code)) %>% ??
+  arrange(desc(total_code)) %>% ??
   head(number_of_pkgs) %>%
   select(pkg_name, total_code)
 
@@ -59,20 +56,22 @@ top_language_colors <- c(
   '#0f8096',
   '#7db954',
   '#17a769',
+  '#b1b1b1',
   '#000000'
 )
 
 names(top_language_colors) <- c(
-  'Assembly',
-  'C',
-  'C++',
-  'JavaScript',
-  'Java',
-  'R',
-  'Python',
-  'Ruby',
-  'SQL',
-  'All'
+  '일반적 증상',
+  '고혈당 증상',
+  '저혈당 증상',
+  '당뇨병케톤산증 증상',
+  '피부 문제',
+  '당뇨병성 발',
+  '위장 장애',
+  '감염',
+  '순환 장애',
+  '심리적인 문제',
+  '기타'
 )
 
 edges1 <- top_languages_per_pkg %>%
