@@ -18,35 +18,35 @@ number_of_words <- 170
 
 # find largest words
 top_words <- data %>%
-  filter(category %in% popular_category) %>%
-  group_by(words) %>%
-  summarize(total_code = sum(code)) %>% ??
-  arrange(desc(total_code)) %>% ??
-  head(number_of_pkgs) %>%
-  select(pkg_name, total_code)
+  filter(category %in% preDM_category) %>%
+  group_by(preDM_words) %>%
+  summarize(total_code = sum(code)) %>% 
+  arrange(desc(total_code)) %>% 
+  head(number_of_words) %>%
+  select(preDM_words, total_code)
 
 # all popular languages per package
-top_languages_per_pkg <- data %>%
+top_category_per_words <- data %>%
   filter(
-    pkg_name %in% top_packages$pkg_name,
-    language %in% popular_languages
+    preDM_words %in% top_words$preDM_words,
+    category %in% preDM_category
   ) %>%
-  arrange(pkg_name, desc(code)) %>%
-  group_by(pkg_name) %>%
+  arrange(preDM_words, desc(code)) %>%
+  group_by(preDM_words) %>%
   mutate(
     main = row_number() == 1, # main language of package should be opaque
     total_code = sum(code)
   ) %>%
   ungroup() %>%
-  select(language, pkg_name, code, total_code, main)
+  select(category, preDM_words, code, total_code, main)
 
 # only following languages found in given packages
-(top_languages <- top_languages_per_pkg %>%
-  pull(language) %>%
+(top_category <- top_category_per_words %>%
+  pull(category) %>%
   unique %>%
   sort)
 
-top_language_colors <- c(
+top_category_colors <- c(
   '#efb306',
   '#eb990c',
   '#e8351e',
@@ -56,13 +56,12 @@ top_language_colors <- c(
   '#0f8096',
   '#7db954',
   '#17a769',
-  '#b1b1b1',
   '#000000'
 )
 
-names(top_language_colors) <- c(
+#'기타(23)', '고혈당증상(62)' 제외
+names(top_category_colors) <- c(
   '일반적 증상',
-  '고혈당 증상',
   '저혈당 증상',
   '당뇨병케톤산증 증상',
   '피부 문제',
@@ -71,44 +70,44 @@ names(top_language_colors) <- c(
   '감염',
   '순환 장애',
   '심리적인 문제',
-  '기타'
+  'All'
 )
 
-edges1 <- top_languages_per_pkg %>%
-  transmute(from = language, to = pkg_name, total_code = code, main)
+edges1 <- top_category_per_words %>%
+  transmute(from = category, to = preDM_words, total_code = code, main)
 
-edges2 <- top_languages_per_pkg %>%
-  count(language, wt = code, name = 'total_code') %>%
+edges2 <- top_category_per_words %>%
+  count(category, wt = code, name = 'total_code') %>%
   transmute(
     from = '',
-    to = language,
+    to = category,
     total_code,
     main = TRUE
   )
 
 edges <- bind_rows(edges1, edges2)
 
-vertices1 <- top_languages_per_pkg %>%
+vertices1 <- top_category_per_words %>%
   filter(main) %>%
   transmute(
-    node = pkg_name, language, total_code, level = 1
+    node = preDM_words, category, total_code, level = 1
   )
 
 vertices2 <- edges2 %>%
   transmute(
-    node = to, language = to, total_code, level = 2
+    node = to, category = to, total_code, level = 2
   )
 
 vertices3 <- tibble(
-  node = '', language = NA, total_code = 0, level = 3
+  node = '', category = NA, total_code = 0, level = 3
 )
 
 vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
   mutate(
     radius = total_code**(1.8), # scaling circles
-    language = factor(language, names(top_language_colors))
+    category = factor(category, names(top_category_colors))
   ) %>%
-  arrange(level, language, node)
+  arrange(level, category, node)
 
 graph <- graph_from_data_frame(edges, vertices = vertices)
 
@@ -117,13 +116,12 @@ layout <- create_layout(graph, layout = 'circle')
 
 outer_circle <- layout %>%
   filter(level == 1) %>%
-  mutate(language = factor(language, names(top_language_colors))) %>%
-  arrange(language, desc(name)) %>%
+  mutate(category = factor(category, names(top_category_colors))) %>%
+  arrange(category, desc(name)) %>%
   mutate(
-    x = cos((row_number() - 1) / number_of_pkgs * 2 * pi),
-    y = sin((row_number() - 1) / number_of_pkgs * 2 * pi)
+    x = cos((row_number() - 1) / number_of_words *2 * pi),
+    y = sin((row_number() - 1) / number_of_words *2 * pi)
   )
-
 # positioning circle centers manually by specifying polar coords
 angles <- c(3, 43, 119, 160, 178, 255, 350, 190, 340, 0)
 radii <- c(0.8, 0.5, 0.6, 0.4, 0.65, 0.45, 0.6, 0.7, 0.38, 0)
@@ -138,11 +136,11 @@ layout[] <- bind_rows(outer_circle, inner_circle) %>%
 
 ggraph(layout) +
   geom_edge_diagonal(
-    aes(edge_color = node1.language, edge_alpha = as.factor(main)),
+    aes(edge_color = node1.category, edge_alpha = as.factor(main)),
     edge_width = 0.3, show.legend = FALSE
   ) +
   geom_node_point(
-    aes(size = radius, color = language),
+    aes(size = radius, color = category),
     alpha = 0.6, show.legend = FALSE
   ) +
   geom_node_text(
@@ -151,7 +149,7 @@ ggraph(layout) +
       y = 1.0175 * y,
       label = name,
       angle = -((-node_angle(x, y) + 90) %% 180) + 90,
-      filter = !(name %in% top_languages)
+      filter = !(name %in% top_category)
     ),
     size = 2, hjust = 'outward', family = 'Arial'
   ) +
@@ -160,7 +158,7 @@ ggraph(layout) +
       x = x,
       y = y,
       label = name,
-      filter = name %in% top_languages
+      filter = name %in% top_category
     ),
     size = 6, hjust = 0.5, family = 'Arial'
   ) +
@@ -173,19 +171,17 @@ ggraph(layout) +
         format(total_code, big.mark = ','),
         total_code
       ),
-      filter = name %in% top_languages
+      filter = name %in% top_category
     ),
     size = 3, hjust = 0.5, family = 'Arial'
   ) +
-  scale_edge_color_manual(values = top_language_colors) +
-  scale_color_manual(values = top_language_colors) +
+  scale_edge_color_manual(values = top_category_colors) +
+  scale_color_manual(values = top_category_colors) +
   scale_size_area(max_size = 150) +
   scale_edge_alpha_manual(values = c(0.15, 1)) +
   coord_fixed() +
   labs(
-    title = 'LOC of Popular Programming Languages in 300 CRAN Packages',
-    subtitle = 'considered are largest CRAN packages written in one (or more) of top 16 programming languages from TIOBE Index (Nov. 2019)',
-    caption = '#tidytuesday 46|2019 spren9er'
+    title = 'Prediabetes signs and symptoms of high-risk group'
   ) +
   theme_void() +
   theme(
@@ -193,12 +189,6 @@ ggraph(layout) +
     legend.position = c(0.645, 0.51),
     plot.title = element_text(
       face = 'bold', hjust = 0.5, size = 20, margin = margin(t = 45, b = 3)
-    ),
-    plot.subtitle = element_text(
-      face = 'plain', hjust = 0.5, size = 13, margin = margin(t = 5, b = 3)),
-    plot.caption = element_text(
-      face = 'plain', color = '#dedede', size = 8, hjust = 1,
-      margin = margin(b = 20)
     )
   )
 
