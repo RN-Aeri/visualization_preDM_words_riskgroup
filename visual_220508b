@@ -1,6 +1,14 @@
 library(tidyverse)
 library(igraph)
 library(ggraph)
+#맥북 한글 폰트 깨짐 방지
+#library('extrafont')
+#font_import() # 맥에 설치된 폰트를 R로 가져옴
+#forts() #가져온 폰트 확인
+
+
+#한글깨짐 방지
+Sys.setlocale(category = "LC_CTYPE", locale = "ko_KR.UTF-8")
 
 path <-
   paste0('~/Dropbox/AERI/research/Prof.Woo/NLP_prediabetes02/data_analysis/20220502_pt단위분석/'
@@ -56,6 +64,7 @@ top_category_colors <- c(
   '#0f8096',
   '#7db954',
   '#17a769',
+  '#a9a9a9',
   '#000000'
 )
 
@@ -70,7 +79,8 @@ names(top_category_colors) <- c(
   '감염',
   '순환 장애',
   '심리적인 문제',
-  'All'
+  '고혈당 증상',
+  '기타'
 )
 
 edges1 <- top_category_per_words %>%
@@ -104,7 +114,7 @@ vertices3 <- tibble(
 
 vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
   mutate(
-    radius = total_code**(1.8), # scaling circles
+    radius = total_code**(2.0), # scaling circles, [AK] 1.8에서 2.0로 조정
     category = factor(category, names(top_category_colors))
   ) %>%
   arrange(level, category, node)
@@ -123,8 +133,8 @@ outer_circle <- layout %>%
     y = sin((row_number() - 1) / number_of_words *2 * pi)
   )
 # positioning circle centers manually by specifying polar coords
-angles <- c(3, 43, 119, 160, 178, 255, 350, 190, 340, 0)
-radii <- c(0.8, 0.5, 0.6, 0.4, 0.65, 0.45, 0.6, 0.7, 0.38, 0)
+angles <- c(35, 80, 119, 160, 185, 230, 300, 320, 330, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
+radii <- c(0.5, 0.75, 0.6, 0.7, 0.75, 0.4, 0.75, 0.7, 0.38, 0.3, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
 centers <- tibble(
   x = radii * cos(angles / 180 * pi),
   y = radii * sin(angles / 180 * pi)
@@ -160,7 +170,7 @@ ggraph(layout) +
       label = name,
       filter = name %in% top_category
     ),
-    size = 6, hjust = 0.5, family = 'Arial'
+    size = 5, hjust = 0.5, family = 'Arial' #[AK] size = 6 -> 5로 수정
   ) +
   geom_node_text(
     aes(
@@ -177,7 +187,7 @@ ggraph(layout) +
   ) +
   scale_edge_color_manual(values = top_category_colors) +
   scale_color_manual(values = top_category_colors) +
-  scale_size_area(max_size = 150) +
+  scale_size_area(max_size = 125) + #[AK] 150->125으로 수정 / inner circles max_size
   scale_edge_alpha_manual(values = c(0.15, 1)) +
   coord_fixed() +
   labs(
