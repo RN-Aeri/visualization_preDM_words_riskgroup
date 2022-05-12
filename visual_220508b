@@ -161,7 +161,7 @@ ggraph(layout) +
       angle = -((-node_angle(x, y) + 90) %% 180) + 90,
       filter = !(name %in% top_category)
     ),
-    size = 2, hjust = 'outward', family = 'Arial'
+    size = 2, hjust = 'outward', family = 'AppleGothic'
   ) +
   geom_node_text(
     aes(
@@ -170,7 +170,7 @@ ggraph(layout) +
       label = name,
       filter = name %in% top_category
     ),
-    size = 5, hjust = 0.5, family = 'Arial' #[AK] size = 6 -> 5로 수정
+    size = 5, hjust = 0.5, family = 'AppleGothic' #[AK] size = 6 -> 5로 수정
   ) +
   geom_node_text(
     aes(
@@ -183,26 +183,26 @@ ggraph(layout) +
       ),
       filter = name %in% top_category
     ),
-    size = 3, hjust = 0.5, family = 'Arial'
+    size = 3, hjust = 0.5, family = 'AppleGothic'
   ) +
   scale_edge_color_manual(values = top_category_colors) +
   scale_color_manual(values = top_category_colors) +
   scale_size_area(max_size = 125) + #[AK] 150->125으로 수정 / inner circles max_size
   scale_edge_alpha_manual(values = c(0.15, 1)) +
   coord_fixed() +
-  labs(
-    title = 'Prediabetes signs and symptoms of high-risk group'
-  ) +
-  theme_void() +
-  theme(
-    text = element_text(family = 'Arial'),
-    legend.position = c(0.645, 0.51),
-    plot.title = element_text(
-      face = 'bold', hjust = 0.5, size = 20, margin = margin(t = 45, b = 3)
-    )
-  )
+  #labs(
+  #  title = 'Prediabetes signs and symptoms of high-risk group'
+  #) +
+  #theme_void() +
+  #theme(
+  #  text = element_text(family = 'AppleGothic'),
+  #  legend.position = c(0.645, 0.51),
+  #  plot.title = element_text(
+  #    face = 'bold', hjust = 0.5, size = 20, margin = margin(t = 45, b = 3)
+  #  )
+  #)
 
 ggsave(
   'images/tidytuesday_201946_cran_packages.png',
-  width = 12, height = 12.5, dpi = 300
+  width = 20, height = 21, dpi = 300 # (12, 12.5, 300)
 )
