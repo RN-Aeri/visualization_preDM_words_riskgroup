@@ -1,0 +1,209 @@
+library(tidyverse)
+library(igraph)
+library(ggraph)
+#맥북 한글 폰트 깨짐 방지
+#library('extrafont')
+#font_import() # 맥에 설치된 폰트를 R로 가져옴
+#forts() #가져온 폰트 확인
+
+
+#한글깨짐 방지
+Sys.setlocale(category = "LC_CTYPE", locale = "ko_KR.UTF-8")
+
+path <-
+  paste0('~/Dropbox/AERI/research/Prof.Woo/NLP_prediabetes02/data_analysis/20220502_pt단위분석/'
+  )
+
+data <- read_csv(paste0(path, 'preDM_risk_words_all_visual_df.csv'))
+
+# ####
+preDM_category <- c(
+"General symptoms","Hyperglycemia symptoms", "Hypoglycemia symptoms", "DKA symptoms","Skin problems","Diabetic foot", 
+"GI disorders","Infections","Circulation problems", "Psychological problems","Others"
+  )
+
+# number of preDMsigns and symptoms words to display
+number_of_words <- 170
+
+# find largest words
+top_words <- data %>%
+  filter(category %in% preDM_category) %>%
+  group_by(preDM_words) %>%
+  summarize(total_code = sum(code)) %>% 
+  arrange(desc(total_code)) %>% 
+  head(number_of_words) %>%
+  select(preDM_words, total_code)
+
+# all popular languages per package
+top_category_per_words <- data %>%
+  filter(
+    preDM_words %in% top_words$preDM_words,
+    category %in% preDM_category
+  ) %>%
+  arrange(preDM_words, desc(code)) %>%
+  group_by(preDM_words) %>%
+  mutate(
+    main = row_number() == 1, # main language of package should be opaque
+    total_code = sum(code)
+  ) %>%
+  ungroup() %>%
+  select(category, preDM_words, code, total_code, main)
+
+# only following languages found in given packages
+(top_category <- top_category_per_words %>%
+  pull(category) %>%
+  unique %>%
+  sort)
+
+top_category_colors <- c(
+  '#efb306',
+  '#eb990c',
+  '#e8351e',
+  '#cd023d',
+  '#852f88',
+  '#4e54ac',
+  '#0f8096',
+  '#7db954',
+  '#17a769',
+  '#a9a9a9',
+  '#000000'
+)
+
+#'기타(23)', '고혈당증상(62)' 제외
+names(top_category_colors) <- c(
+ "General symptoms",
+ "Hyperglycemia symptoms",
+ "Hypoglycemia symptoms", 
+ "DKA symptoms",
+ "Skin problems",
+ "Diabetic foot", 
+ "GI disorders",
+ "Infections",
+ "Circulation problems", 
+ "Psychological problems",
+ "Others"
+)
+
+edges1 <- top_category_per_words %>%
+  transmute(from = category, to = preDM_words, total_code = code, main)
+
+edges2 <- top_category_per_words %>%
+  count(category, wt = code, name = 'total_code') %>%
+  transmute(
+    from = '',
+    to = category,
+    total_code,
+    main = TRUE
+  )
+
+edges <- bind_rows(edges1, edges2)
+
+vertices1 <- top_category_per_words %>%
+  filter(main) %>%
+  transmute(
+    node = preDM_words, category, total_code, level = 1
+  )
+
+vertices2 <- edges2 %>%
+  transmute(
+    node = to, category = to, total_code, level = 2
+  )
+
+vertices3 <- tibble(
+  node = '', category = NA, total_code = 0, level = 3
+)
+
+vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
+  mutate(
+    radius = total_code**(2.0), # scaling circles, [AK] 1.8에서 2.0로 조정
+    category = factor(category, names(top_category_colors))
+  ) %>%
+  arrange(level, category, node)
+
+graph <- graph_from_data_frame(edges, vertices = vertices)
+
+# create custom layout by updating existing circle layout
+layout <- create_layout(graph, layout = 'circle')
+
+outer_circle <- layout %>%
+  filter(level == 1) %>%
+  mutate(category = factor(category, names(top_category_colors))) %>%
+  arrange(category, desc(name)) %>%
+  mutate(
+    x = cos((row_number() - 1) / number_of_words *2 * pi),
+    y = sin((row_number() - 1) / number_of_words *2 * pi)
+  )
+# positioning circle centers manually by specifying polar coords
+angles <- c(35, 80, 119, 160, 185, 230, 300, 320, 330, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
+radii <- c(0.5, 0.75, 0.6, 0.7, 0.75, 0.4, 0.75, 0.7, 0.38, 0.3, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
+centers <- tibble(
+  x = radii * cos(angles / 180 * pi),
+  y = radii * sin(angles / 180 * pi)
+)
+inner_circle <- bind_cols(centers, select(filter(layout, level != 1), -x, -y))
+
+layout[] <- bind_rows(outer_circle, inner_circle) %>%
+  arrange(.ggraph.index)
+
+ggraph(layout) +
+  geom_edge_diagonal(
+    aes(edge_color = node1.category, edge_alpha = as.factor(main)),
+    edge_width = 0.3, show.legend = FALSE
+  ) +
+  geom_node_point(
+    aes(size = radius, color = category),
+    alpha = 0.6, show.legend = FALSE
+  ) +
+  geom_node_text(
+    aes(
+      x = 1.0175 * x,
+      y = 1.0175 * y,
+      label = name,
+      angle = -((-node_angle(x, y) + 90) %% 180) + 90,
+      filter = !(name %in% top_category)
+    ),
+    size = 2, hjust = 'outward', family = 'AppleGothic'
+  ) +
+  geom_node_text(
+    aes(
+      x = x,
+      y = y,
+      label = name,
+      filter = name %in% top_category
+    ),
+    size = 5, hjust = 0.5, family = 'AppleGothic' #[AK] size = 6 -> 5로 수정
+  ) +
+  geom_node_text(
+    aes(
+      x = x,
+      y = y - 0.045,
+      label = ifelse(
+        total_code > 1000,
+        format(total_code, big.mark = ','),
+        total_code
+      ),
+      filter = name %in% top_category
+    ),
+    size = 3, hjust = 0.5, family = 'AppleGothic'
+  ) +
+  scale_edge_color_manual(values = top_category_colors) +
+  scale_color_manual(values = top_category_colors) +
+  scale_size_area(max_size = 125) + #[AK] 150->125으로 수정 / inner circles max_size
+  scale_edge_alpha_manual(values = c(0.15, 1)) +
+  coord_fixed() +
+  #labs(
+  #  title = 'Prediabetes signs and symptoms of high-risk group'
+  #) +
+  #theme_void() +
+  #theme(
+  #  text = element_text(family = 'AppleGothic'),
+  #  legend.position = c(0.645, 0.51),
+  #  plot.title = element_text(
+  #    face = 'bold', hjust = 0.5, size = 20, margin = margin(t = 45, b = 3)
+  #  )
+  #)
+
+ggsave(
+  'images/tidytuesday_201946_cran_packages.png',
+  width = 20, height = 21, dpi = 300 # (12, 12.5, 300)
+)
