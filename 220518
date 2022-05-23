@@ -115,7 +115,7 @@ vertices3 <- tibble(
 
 vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
   mutate(
-    radius = total_code**(2.0), # scaling circles, [AK] 1.8에서 2.0로 조정
+    radius = total_code**(3.0), # scaling circles, [AK] 1.8에서-> 2.0->3.0로 조정
     category = factor(category, names(top_category_colors))
   ) %>%
   arrange(level, category, node)
