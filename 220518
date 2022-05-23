@@ -134,8 +134,8 @@ outer_circle <- layout %>%
     y = sin((row_number() - 1) / number_of_words *2 * pi)
   )
 # positioning circle centers manually by specifying polar coords
-angles <- c(35, 50, 95, 140, 165, 220, 270, 295, 320, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
-radii <- c(0.5, 0.75, 0.6, 0.7, 0.75, 0.4, 0.75, 0.7, 0.38, 0.3, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
+angles <- c(35, 55, 85, 120, 165, 210, 245, 275, 310, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
+radii <- c(0.45, 0.75, 0.6, 0.5, 0.7, 0.6, 0.4, 0.55, 0.35, 0.7, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
 centers <- tibble(
   x = radii * cos(angles / 180 * pi),
   y = radii * sin(angles / 180 * pi)
@@ -188,7 +188,7 @@ ggraph(layout) +
   ) +
   scale_edge_color_manual(values = top_category_colors) +
   scale_color_manual(values = top_category_colors) +
-  scale_size_area(max_size = 150) + #[AK] 150->150으로 수정 / inner circles max_size
+  scale_size_area(max_size = 160) + #[AK] 150->160으로 수정 / inner circles max_size
   scale_edge_alpha_manual(values = c(0.15, 1)) +
   coord_fixed() +
   #labs(
