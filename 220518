@@ -98,7 +98,7 @@ edges2 <- top_category_per_words %>%
 
 edges <- bind_rows(edges1, edges2)
 
-vertices1 <- top_category_per_words %>%
+vertices1 <- top_category_per_words %>% 
   filter(main) %>%
   transmute(
     node = preDM_words, category, total_code, level = 1
@@ -115,7 +115,7 @@ vertices3 <- tibble(
 
 vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
   mutate(
-    radius = total_code**(3.0), # scaling circles, [AK] 1.8에서-> 2.0->3.0로 조정
+    radius = total_code**(1.8), # scaling circles, [AK] 1.8에서-> 2.0->3.0 -> 1.8로 조정
     category = factor(category, names(top_category_colors))
   ) %>%
   arrange(level, category, node)
@@ -140,7 +140,7 @@ centers <- tibble(
   x = radii * cos(angles / 180 * pi),
   y = radii * sin(angles / 180 * pi)
 )
-inner_circle <- bind_cols(centers, select(filter(layout, level != 1), -x, -y))
+inner_circle <- bind_cols(centers, select(filter(layout, level != 1), -x, -y)) 
 
 layout[] <- bind_rows(outer_circle, inner_circle) %>%
   arrange(.ggraph.index)
