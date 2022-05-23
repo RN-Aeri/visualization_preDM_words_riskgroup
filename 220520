@@ -22,7 +22,7 @@ preDM_category <- c(
   )
 
 # number of preDMsigns and symptoms words to display
-number_of_words <- 170
+number_of_words <- 201 # number of unique words 
 
 # find largest words
 top_words <- data %>%
