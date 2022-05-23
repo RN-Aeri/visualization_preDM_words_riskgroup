@@ -204,6 +204,6 @@ ggraph(layout) +
   #)
 
 ggsave(
-  'images/tidytuesday_201946_cran_packages.png',
+  ''~/Dropbox/AERI/research/image_220523.png',
   width = 20, height = 21, dpi = 300 # (12, 12.5, 300)
 )
