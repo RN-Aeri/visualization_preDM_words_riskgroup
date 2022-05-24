@@ -11,7 +11,7 @@ library(ggraph)
 Sys.setlocale(category = "LC_CTYPE", locale = "ko_KR.UTF-8")
 
 path <-
-  paste0('~/Dropbox/AERI/research/Prof.Woo/NLP_prediabetes02/data_analysis/20220502_pt단위분석/'
+  paste0('~/Dropbox/AERI/research/Prof.Woo/NLP_prediabetes02/data_analysis/visualization/data/'
   )
 
 data <- read_csv(paste0(path, 'preDM_risk_words_all_visual_df.csv'))
