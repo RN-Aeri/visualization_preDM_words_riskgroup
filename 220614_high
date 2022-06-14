@@ -136,9 +136,11 @@ outer_circle <- layout %>%
     x = cos((row_number() - 1) / number_of_words *2 * pi),
     y = sin((row_number() - 1) / number_of_words *2 * pi)
   )
+  
+
 # positioning circle centers manually by specifying polar coords
-angles <- c(35, 85, 120, 165, 210, 245, 275, 310, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
-radii <- c(0.45, 0.6, 0.5, 0.7, 0.6, 0.4, 0.55, 0.35, 0.7, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
+angles <- c(35, 55, 85, 120, 165, 210, 245, 275, 310, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
+radii <- c(0.45, 0.75, 0.6, 0.5, 0.7, 0.6, 0.4, 0.55, 0.35, 0.7, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
 centers <- tibble(
   x = radii * cos(angles / 180 * pi),
   y = radii * sin(angles / 180 * pi)
