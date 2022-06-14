@@ -139,8 +139,8 @@ outer_circle <- layout %>%
   
 
 # positioning circle centers manually by specifying polar coords
-angles <- c(35, 55, 85, 120, 165, 210, 245, 275, 310, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
-radii <- c(0.45, 0.75, 0.6, 0.5, 0.7, 0.6, 0.4, 0.55, 0.35, 0.7, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
+angles <- c(25, 40, 80, 115, 165, 190, 240, 280, 320, 340, 360, 200) #원의 둘레에 대한 위치 (0-360도)
+radii <- c(0.4, 0.75, 0.65, 0.4, 0.7, 0.6, 0.35, 0.55, 0.4, 0.6, 0.8, 0.9) #원 중심에서 떨어진 정도 (0-1.0)
 centers <- tibble(
   x = radii * cos(angles / 180 * pi),
   y = radii * sin(angles / 180 * pi)
@@ -209,6 +209,6 @@ ggraph(layout) +
   #)
 
 ggsave(
-  '~/Dropbox/AERI/research/image_low_220523.png',
-  width = 20, height = 21, dpi = 300 # (12, 12.5, 300)
+  '~/Dropbox/AERI/research/image_high_220614.png',
+  width = 30, height = 31, dpi = 600 # (20, 21, 300)
 )
