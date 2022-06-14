@@ -202,6 +202,6 @@ ggraph(layout) +
   #)
 
 ggsave(
-  '~/Dropbox/AERI/research/image_low_220523.png',
-  width = 20, height = 21, dpi = 300 # (12, 12.5, 300)
+  '~/Dropbox/AERI/research/image_low_220614.png',
+  width = 24, height = 25, dpi = 600 # (12, 12.5, 300)
 )
