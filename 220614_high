@@ -57,6 +57,7 @@ top_category_per_words <- data %>%
 
 top_category_colors <- c(
   '#efb306',
+  '#eb990c',
   '#e8351e',
   '#cd023d',
   '#852f88',
@@ -68,10 +69,13 @@ top_category_colors <- c(
   '#000000'
 )
 
-#'기타(23)', '고혈당증상(62)' 제외
+
+
+
+#
 names(top_category_colors) <- c(
  "General symptoms",
- "Hyperglycemia symptoms"
+ "Hyperglycemia symptoms",
  "Hypoglycemia symptoms", 
  "DKA symptoms",
  "Skin problems",
