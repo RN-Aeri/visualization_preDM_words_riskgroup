@@ -113,7 +113,7 @@ vertices3 <- tibble(
 
 vertices <- bind_rows(vertices1, vertices2, vertices3) %>%
   mutate(
-    radius = total_code**(1.8), # scaling circles, [AK] 1.8에서-> 2.0->3.0 -> 1.8로 조정
+    radius = total_code**(1.6), # scaling circles, [AK] 1.8에서-> 2.0->3.0 -> 1.8로 조정
     category = factor(category, names(top_category_colors))
   ) %>%
   arrange(level, category, node)
@@ -169,7 +169,7 @@ ggraph(layout) +
       label = name,
       filter = name %in% top_category
     ),
-    size = 7, hjust = 0.5, family = 'AppleGothic' #[AK] size = 6 -> 7로 수정
+    size = 12, hjust = 0.5, family = 'AppleGothic' #[AK] size = 6 -> 7로 수정
   ) +
   geom_node_text(
     aes(
@@ -182,7 +182,7 @@ ggraph(layout) +
       ),
       filter = name %in% top_category
     ),
-    size = 5, hjust = 0.5, family = 'AppleGothic' #[AK] size = 3 -> 5로 수정
+    size = 8, hjust = 0.5, family = 'AppleGothic' #[AK] size = 3 -> 5로 수정
   ) +
   scale_edge_color_manual(values = top_category_colors) +
   scale_color_manual(values = top_category_colors) +
